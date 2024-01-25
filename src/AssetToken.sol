@@ -7,10 +7,8 @@ import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract AssetToken is ERC20, Ownable {
     event Minted(uint256 indexed amount, address indexed to);
-    
-    constructor(address _owner) ERC20("AssetToken", "ATN") Ownable(_owner) {
 
-    }
+    constructor(address _owner) ERC20("AssetToken", "ATN") Ownable(_owner) {}
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
