@@ -10,7 +10,7 @@ import "forge-std/console.sol";//
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
 
-    address constant USDT = 0xA02f6adc7926efeBBd59Fd43A84f4E0c0c91e832; //mumbai
+    address constant USDT = 0x6B175474E89094C44Da98b954EedeAC495271d0F; //dai
     uint256 constant duration = 365 * 1 days;
     AssetToken public _assetToken;
     AssetNFT public _assetNFT;

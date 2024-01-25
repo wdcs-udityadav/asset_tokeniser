@@ -34,7 +34,7 @@ contract AssetTokenizerTest is Test {
         assetNFT = assetTokenizer._assetNFT();
         assetToken = assetTokenizer._assetToken();
 
-        usdt = IERC20(0xA02f6adc7926efeBBd59Fd43A84f4E0c0c91e832);
+        usdt = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     }
 
     function testPropertyListed() public {
@@ -57,30 +57,33 @@ contract AssetTokenizerTest is Test {
         console.log("propertyOwner: ", propertyOwner);
         console.log("address(this): ", address(this));
 
-
-        deal(address(usdt), investor, 100 * 1e6, true);
+        console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
+        deal(address(usdt), investor, 100 * 1e18, true);
+        console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
 
         vm.startPrank(propertyOwner);
-        assetTokenizer.listProperty(1, 1000, 10, 100000);
+        assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18);
         assertEq(assetNFT.ownerOf(1), propertyOwner);
         console.log("owner",assetNFT.ownerOf(1));
-        assertEq(assetToken.balanceOf(propertyOwner), 100);
-        assertTrue(assetToken.approve(address(assetTokenizer), 100));
+        console.log("Balance of proper: ", usdt.balanceOf(investor)/1e18);
+
+        assertEq(assetToken.balanceOf(propertyOwner), 100*1e18);
+        assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
         vm.stopPrank();
 
         vm.startPrank(investor, investor);
-        console.log("Balance of investor: ", usdt.balanceOf(investor)/1e6);
-        // vm.prank(investor);
-        bool result = usdt.approve(address(assetTokenizer), 100);
+        console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
+        bool result = usdt.approve(address(assetTokenizer), 100*1e18);
+        assertTrue(result);
         console.log("result: ", result);
 
-        // assetTokenizer.investInProperty(1, 100);
-        // console.log("usdt balance investor: ", usdt.balanceOf(investor));
-        // console.log("token balance investor: ", assetToken.balanceOf(investor));
-        // console.log("token balance propertyOwner: ", assetToken.balanceOf(propertyOwner));
-        // assertEq(assetToken.balanceOf(propertyOwner), 100);
-        // assertEq(assetToken.balanceOf(investor), 100);
-        // vm.stopPrank();
+        assetTokenizer.investInProperty(1, 100*1e18);
+        console.log("usdt balance investor: ", usdt.balanceOf(investor)/1e18);
+        console.log("token balance investor: ", assetToken.balanceOf(investor)/1e18);
+        console.log("token balance propertyOwner: ", assetToken.balanceOf(propertyOwner)/1e18);
+        assertEq(assetToken.balanceOf(propertyOwner), 0);
+        assertEq(assetToken.balanceOf(investor), 100*1e18);
+        vm.stopPrank();
     }
 
     // function testEmitInvested() public {
