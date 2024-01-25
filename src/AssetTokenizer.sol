@@ -10,6 +10,7 @@ contract AssetTokenizer {
     using SafeERC20 for IERC20;
 
     address constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+
     AssetToken public _assetToken;
     AssetNFT public _assetNFT;
 
@@ -31,6 +32,8 @@ contract AssetTokenizer {
     mapping(uint256 => Property) public listedProperties;
     mapping(uint256 => mapping(address => Investment)) public investments;
 
+    error NoInvestmentFound();
+
     event PropertyListed(
         uint256 indexed propertyId, 
         address indexed owner, 
@@ -38,14 +41,23 @@ contract AssetTokenizer {
         uint256 indexed investibleAmount
     );
 
-    event Invested(uint256 propertyId, uint256 amountInvested, address investor);
+    event Invested(
+        uint256 propertyId,
+        uint256 amountInvested,
+        address investor
+    );
     
     constructor() {
-        _assetToken = new AssetToken(msg.sender);
-        _assetNFT =  new AssetNFT(msg.sender); 
+        _assetToken = new AssetToken(address(this));
+        _assetNFT =  new AssetNFT(address(this)); 
     }
 
-    function listProperty(uint256 _propertyId, uint256 _valuation, uint256 _investiblePercentage, uint256 _rentalIncome) public {
+    function listProperty(
+        uint256 _propertyId,
+        uint256 _valuation, 
+        uint256 _investiblePercentage, 
+        uint256 _rentalIncome
+    ) public {
         uint256 investibleAmount = (_investiblePercentage * _valuation) / 100;
         
         Property memory _property = Property(
@@ -74,6 +86,7 @@ contract AssetTokenizer {
         );
 
         address propertyOwner = listedProperties[_propertyId].propertyOwner;
+
         IERC20(USDT).safeTransferFrom(msg.sender, propertyOwner, _amount);
         investments[_propertyId][msg.sender] = _investment;
 
@@ -82,7 +95,12 @@ contract AssetTokenizer {
         emit Invested(_propertyId, _amount, msg.sender);
     }
 
-    function claimDividend() public {
-        
+    function claimDividend(uint256 _propertyId) public view{
+        uint256 amountInvested = investments[_propertyId][msg.sender].amountInvested;
+        if(amountInvested == 0) revert NoInvestmentFound();
+
+        uint256 percentage = (amountInvested * 100) / listedProperties[_propertyId].valuation;
+        uint256 dividendAmount = (listedProperties[_propertyId].rentalIncome * percentage)/100; 
+        uint256 dividendPerDay = dividendAmount/365;
     }
 }
