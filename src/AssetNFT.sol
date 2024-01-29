@@ -17,7 +17,6 @@ contract AssetNFT is ERC721URIStorage, Ownable {
     constructor(address _owner) ERC721("AssetTokenizerNFT", "ANFT") Ownable(_owner) {}
 
     function mint(address to, string memory tokenURI) public onlyOwner {
-        // console.log("msg.sender mint: ", msg.sender);
         _tokenIds.increment();
         uint256 tokenId = _tokenIds.current();
         _mint(to, tokenId);

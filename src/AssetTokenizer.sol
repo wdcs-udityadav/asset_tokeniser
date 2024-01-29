@@ -10,7 +10,9 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
 
-    address constant USDT = 0x6B175474E89094C44Da98b954EedeAC495271d0F; //dai
+    //dai, since theres's come issue with approvals on USDT contract
+    address constant USDT = 0x6B175474E89094C44Da98b954EedeAC495271d0F; 
+
     uint256 constant duration = 365 * 1 days;
     AssetToken public _assetToken;
     AssetNFT public _assetNFT;
@@ -47,7 +49,7 @@ contract AssetTokenizer {
 
     event Invested(uint256 indexed propertyId, uint256 indexed amountInvested, address indexed investor);
 
-    event DividendClaimed(uint256 propertyId, uint256 amount, address investor);
+    event DividendClaimed(uint256 indexed propertyId, uint256 indexed  amount, address indexed investor);
 
     constructor() {
         _assetToken = new AssetToken(address(this));
@@ -57,7 +59,6 @@ contract AssetTokenizer {
     function listProperty(uint256 _propertyId, uint256 _valuation, uint256 _investiblePercentage, uint256 _rentalIncome)
         public
         payable
-        returns (uint256)
     {
         require(
             _propertyId > 0 && _valuation > 0 && _investiblePercentage > 0 && _rentalIncome > 0,
@@ -78,7 +79,6 @@ contract AssetTokenizer {
         _assetToken.mint(msg.sender, investibleAmount);
 
         emit PropertyListed(_propertyId, msg.sender, _valuation, investibleAmount);
-        return _propertyId;
     }
 
     function investInProperty(uint256 _propertyId, uint256 _amount) public {

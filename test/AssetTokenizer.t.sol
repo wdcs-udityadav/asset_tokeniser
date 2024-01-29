@@ -31,6 +31,8 @@ contract AssetTokenizerTest is Test {
 
     event Invested(uint256 propertyId, uint256 amountInvested, address investor);
 
+    event DividendClaimed(uint256 propertyId, uint256 amount, address investor);
+
     function setUp() public {
         assetTokenizer = new AssetTokenizer();
         assetNFT = assetTokenizer._assetNFT();
@@ -44,6 +46,11 @@ contract AssetTokenizerTest is Test {
 
         assertEq(assetNFT.ownerOf(1), address(this));
         assertEq(assetToken.balanceOf(address(this)), 100 * 1e18);
+    }
+
+    function testPropertyListedFailIfValueSentUnequal() public {
+        vm.expectRevert(bytes("msg.value must be equal to rentalincome"));
+        assetTokenizer.listProperty{value: 10}(1, 1000 * 1e18, 10, 100000 * 1e18);
     }
 
     function testEmitPropertyListed() public {
@@ -135,6 +142,33 @@ contract AssetTokenizerTest is Test {
         assertEq(assetToken.balanceOf(propertyOwner), 100 * 1e18);
         assertTrue(assetToken.approve(address(assetTokenizer), 100 * 1e18));
         vm.stopPrank();
+
+        vm.startPrank(investor, investor);
+        assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
+        assetTokenizer.investInProperty(1, 100 * 1e18);
+        assertEq(assetToken.balanceOf(propertyOwner), 0);
+        assertEq(assetToken.balanceOf(investor), 100 * 1e18);
+        skip(1 days);
+        assetTokenizer.claimDividend(1);
+        vm.stopPrank();
+    }
+
+    function testEmitDividendClaimed() public {
+        address propertyOwner = vm.addr(1);
+        address investor = vm.addr(2);
+
+        vm.deal(propertyOwner, 100000 ether);
+        deal(address(usdt), investor, 100 * 1e18, true);
+
+        vm.startPrank(propertyOwner);
+        assetTokenizer.listProperty{value: 100000 * 1e18}(1, 1000 * 1e18, 10, 100000 * 1e18);
+        assertEq(assetNFT.ownerOf(1), propertyOwner);
+        assertEq(assetToken.balanceOf(propertyOwner), 100 * 1e18);
+        assertTrue(assetToken.approve(address(assetTokenizer), 100 * 1e18));
+        vm.stopPrank();
+
+        vm.expectEmit(true, true, true, true);
+        emit DividendClaimed(1, 27397260273972602739, address(investor));
 
         vm.startPrank(investor, investor);
         assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
