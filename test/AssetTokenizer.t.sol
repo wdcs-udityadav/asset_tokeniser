@@ -5,9 +5,13 @@ import {Test, console} from "forge-std/Test.sol";
 import {AssetTokenizer} from "../src/AssetTokenizer.sol";
 import {AssetNFT} from "../src/AssetNFT.sol";
 import {AssetToken} from "../src/AssetToken.sol";
-import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+// import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+
 
 contract AssetTokenizerTest is Test {
+    using SafeERC20 for IERC20;
+
     AssetTokenizer public assetTokenizer;
     AssetNFT public assetNFT;
     AssetToken public assetToken;
@@ -31,7 +35,7 @@ contract AssetTokenizerTest is Test {
         assetNFT = assetTokenizer._assetNFT();
         assetToken = assetTokenizer._assetToken();
 
-        usdt = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+        usdt = IERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
     }
 
     function testPropertyListed() public {
@@ -67,8 +71,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        bool result = usdt.approve(address(assetTokenizer), 100 * 1e18);
-        assertTrue(result);
+        usdt.forceApprove(address(assetTokenizer), 100 * 1e18);
 
         assetTokenizer.investInProperty(1, 100 * 1e18);
         assertEq(assetToken.balanceOf(propertyOwner), 0);
@@ -91,7 +94,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        assertTrue(usdt.approve(address(assetTokenizer), 200 * 1e18));
+        usdt.forceApprove(address(assetTokenizer), 200 * 1e18);
         vm.expectRevert(AmountExceeds.selector);
         assetTokenizer.investInProperty(1, 200 * 1e18);
         vm.stopPrank();
@@ -112,7 +115,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
+        usdt.forceApprove(address(assetTokenizer), 100 * 1e18);
         assetTokenizer.investInProperty(1, 100 * 1e18);
         vm.expectRevert(AlreadyInvested.selector);
 
@@ -133,7 +136,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        usdt.approve(address(assetTokenizer), 100 * 1e18);
+        usdt.forceApprove(address(assetTokenizer), 100 * 1e18);
         vm.expectEmit(true, true, true, false);
         emit Invested(1, 100 * 1e18, address(investor));
         assetTokenizer.investInProperty(1, 100 * 1e18);
@@ -155,7 +158,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
+        usdt.forceApprove(address(assetTokenizer), 100 * 1e18);
         assetTokenizer.investInProperty(1, 100 * 1e18);
         assertEq(assetToken.balanceOf(propertyOwner), 0);
         assertEq(assetToken.balanceOf(investor), 100 * 1e18);
@@ -198,7 +201,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
+        usdt.forceApprove(address(assetTokenizer), 100 * 1e18);
         assetTokenizer.investInProperty(1, 100 * 1e18);
         assertEq(assetToken.balanceOf(propertyOwner), 0);
         assertEq(assetToken.balanceOf(investor), 100 * 1e18);
@@ -224,7 +227,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
+        usdt.forceApprove(address(assetTokenizer), 100 * 1e18);
         assetTokenizer.investInProperty(1, 100 * 1e18);
         assertEq(assetToken.balanceOf(propertyOwner), 0);
         assertEq(assetToken.balanceOf(investor), 100 * 1e18);
@@ -248,7 +251,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(investor);
-        assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
+        usdt.forceApprove(address(assetTokenizer), 100 * 1e18);
         assetTokenizer.investInProperty(1, 100 * 1e18);
         assertEq(assetToken.balanceOf(propertyOwner), 0);
         assertEq(assetToken.balanceOf(investor), 100 * 1e18);

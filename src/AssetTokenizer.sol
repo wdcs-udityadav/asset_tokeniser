@@ -3,13 +3,13 @@ pragma solidity ^0.8.13;
 
 import {AssetToken} from "./AssetToken.sol";
 import {AssetNFT} from "./AssetNFT.sol";
-import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";  
 
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
 
-    //using dai, since theres's some issue with approvals on USDT contract
-    address constant USDT = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    //USDT contract on mainnet
+    address constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
     uint256 constant duration = 365 * 1 days;
     AssetToken public _assetToken;
@@ -78,6 +78,7 @@ contract AssetTokenizer {
 
     function investInProperty(uint256 _propertyId, uint256 _amount) public {
         if (investments[_propertyId][msg.sender].amountInvested > 0) revert AlreadyInvested();
+        require(_propertyId != 0, "invalid propertyId");
         require(_amount > 0, "amount should be greater than zero.");
         if (_amount > listedProperties[_propertyId].investibleAmount) revert AmountExceeds();
 
@@ -98,6 +99,7 @@ contract AssetTokenizer {
     }
 
     function claimDividend(uint256 _propertyId) public {
+        require(_propertyId != 0, "invalid propertyId");
         if (investments[_propertyId][msg.sender].amountInvested == 0) revert NoInvestmentFound();
         if (block.timestamp > investments[_propertyId][msg.sender].investedAt + duration) revert DividentNoLongerCanBeClaimed();
 
