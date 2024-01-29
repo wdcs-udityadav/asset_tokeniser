@@ -86,7 +86,6 @@ contract AssetTokenizerTest is Test {
     function testEmitInvested() public {
         address propertyOwner = vm.addr(1);
         address investor = vm.addr(2);
-        console.log("investor: ", investor);
 
         vm.deal(propertyOwner, 100000 ether);
         deal(address(usdt), investor, 100*1e18, true);
