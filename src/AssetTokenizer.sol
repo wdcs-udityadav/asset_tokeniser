@@ -5,7 +5,7 @@ import {AssetToken} from "./AssetToken.sol";
 import {AssetNFT} from "./AssetNFT.sol";
 
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "forge-std/console.sol";//
+import "forge-std/console.sol";
 
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
@@ -55,14 +55,14 @@ contract AssetTokenizer {
     }
 
     function listProperty(uint256 _propertyId, uint256 _valuation, uint256 _investiblePercentage, uint256 _rentalIncome)
-        public returns(Property memory)
+        public returns(uint256)
     {
         require(
             _propertyId > 0 && _valuation > 0 && _investiblePercentage > 0 && _rentalIncome > 0,
             "Input must be greater than zero."
         );
 
-        console.log("msg.sender in contract:", msg.sender);// 
+        // console.log("msg.sender in contract:", msg.sender);
         uint256 investibleAmount = (_investiblePercentage * _valuation) / 100;
 
         Property memory _property =
@@ -75,7 +75,7 @@ contract AssetTokenizer {
         _assetToken.mint(msg.sender, investibleAmount);
 
         emit PropertyListed(_propertyId, msg.sender, _valuation, investibleAmount);
-        return _property;
+        return _propertyId;
     }
 
     function investInProperty(uint256 _propertyId, uint256 _amount) public {
@@ -97,13 +97,14 @@ contract AssetTokenizer {
         IERC20(_assetToken).safeTransferFrom(propertyOwner, msg.sender, _amount);
 
         emit Invested(_propertyId, _amount, msg.sender);
+        console.log("invested: ", _propertyId, _amount, msg.sender);
     }
 
     function claimDividend(uint256 _propertyId) public {
         if (investments[_propertyId][msg.sender].amountInvested == 0) revert NoInvestmentFound();
-        if (block.timestamp > duration) revert DividentNoLongerCanBeClaimed();
+        if (block.timestamp > investments[_propertyId][msg.sender].investedAt+duration) revert DividentNoLongerCanBeClaimed();
 
-        uint256 elapsedTime = investments[_propertyId][msg.sender].investedAt - block.timestamp;
+        uint256 elapsedTime =  block.timestamp - investments[_propertyId][msg.sender].investedAt;
         if (elapsedTime < 1 days) revert TryAfter24Hours();
 
         uint256 dividendAmount = (

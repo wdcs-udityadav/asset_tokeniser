@@ -23,6 +23,8 @@ contract AssetTokenizerTest is Test {
 
     IERC20 public usdt;
 
+
+    error TryAfter24Hours();
     event PropertyListed(
         uint256 indexed propertyId, address indexed owner, uint256 valuation, uint256 indexed investibleAmount
     );
@@ -53,34 +55,34 @@ contract AssetTokenizerTest is Test {
     function testInvestInProperty() public {
         address propertyOwner = vm.addr(1);
         address investor = vm.addr(2);
-        console.log("investor: ", investor);
-        console.log("propertyOwner: ", propertyOwner);
-        console.log("address(this): ", address(this));
+        // console.log("investor: ", investor);
+        // console.log("propertyOwner: ", propertyOwner);
+        // console.log("address(this): ", address(this));
 
-        console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
+        // console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
         deal(address(usdt), investor, 100 * 1e18, true);
-        console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
+        // console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
 
         vm.startPrank(propertyOwner);
         assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18);
         assertEq(assetNFT.ownerOf(1), propertyOwner);
-        console.log("owner",assetNFT.ownerOf(1));
-        console.log("Balance of proper: ", usdt.balanceOf(investor)/1e18);
+        // console.log("owner",assetNFT.ownerOf(1));
+        // console.log("Balance of proper: ", usdt.balanceOf(investor)/1e18);
 
         assertEq(assetToken.balanceOf(propertyOwner), 100*1e18);
         assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
         vm.stopPrank();
 
         vm.startPrank(investor, investor);
-        console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
+        // console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
         bool result = usdt.approve(address(assetTokenizer), 100*1e18);
         assertTrue(result);
-        console.log("result: ", result);
+        // console.log("result: ", result);
 
         assetTokenizer.investInProperty(1, 100*1e18);
-        console.log("usdt balance investor: ", usdt.balanceOf(investor)/1e18);
-        console.log("token balance investor: ", assetToken.balanceOf(investor)/1e18);
-        console.log("token balance propertyOwner: ", assetToken.balanceOf(propertyOwner)/1e18);
+        // console.log("usdt balance investor: ", usdt.balanceOf(investor)/1e18);
+        // console.log("token balance investor: ", assetToken.balanceOf(investor)/1e18);
+        // console.log("token balance propertyOwner: ", assetToken.balanceOf(propertyOwner)/1e18);
         assertEq(assetToken.balanceOf(propertyOwner), 0);
         assertEq(assetToken.balanceOf(investor), 100*1e18);
         vm.stopPrank();
@@ -89,24 +91,69 @@ contract AssetTokenizerTest is Test {
     // function testEmitInvested() public {
     //     address propertyOwner = vm.addr(1);
     //     address investor = vm.addr(2);
-    //     console.log("balance: ", usdt.balanceOf(investor)/1e6);
-    //     console.log("totalSupply: ", usdt.totalSupply()/1e6);
+    //     console.log("investor: ", investor);
 
-    //     deal(address(usdt), investor, 100*1e6, true);
-    //     console.log("balance: ", usdt.balanceOf(investor)/1e6);
-    //     console.log("totalSupply: ", usdt.totalSupply()/1e6);
+    //     deal(address(usdt), investor, 100*1e18, true);
 
     //     vm.startPrank(propertyOwner);
-    //     assetTokenizer.listProperty(1, 1000, 10, 100000);
-    //     assetToken.approve(address(assetTokenizer), 100);
+    //     assertEq(assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18),1);
+    //     assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
     //     vm.stopPrank();
 
-    //     vm.expectEmit(true, true, true,false);
-    //     emit Invested(1, 100, address(this));
-
+    //     vm.expectEmit(true, true, true, false);
+    //     emit Invested(1, 1e20, address(investor));
     //     vm.startPrank(investor);
-    //     usdt.approve(address(assetTokenizer), 100);
-    //     assetTokenizer.investInProperty(1, 100);
+    //     usdt.approve(address(assetTokenizer), 100*1e18);
+
+       
+    //     assetTokenizer.investInProperty(1, 100*1e18);
     //     vm.stopPrank();
     // }
+
+    function testClaimDividendFailsBefore24Hours() public {
+        address propertyOwner = vm.addr(1);
+        address investor = vm.addr(2);
+
+        deal(address(usdt), investor, 100 * 1e18, true);
+
+        vm.startPrank(propertyOwner);
+        assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18);
+        assertEq(assetNFT.ownerOf(1), propertyOwner);
+        assertEq(assetToken.balanceOf(propertyOwner), 100*1e18);
+        assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
+        vm.stopPrank();
+
+        vm.startPrank(investor, investor);
+        assertTrue(usdt.approve(address(assetTokenizer), 100*1e18));
+        assetTokenizer.investInProperty(1, 100*1e18);
+        assertEq(assetToken.balanceOf(propertyOwner), 0);
+        assertEq(assetToken.balanceOf(investor), 100*1e18);
+
+        vm.expectRevert(TryAfter24Hours.selector);
+        assetTokenizer.claimDividend(1);
+        vm.stopPrank();
+    }
+
+    function testClaimDividend() public {
+        address propertyOwner = vm.addr(1);
+        address investor = vm.addr(2);
+
+        deal(address(usdt), investor, 100 * 1e18, true);
+
+        vm.startPrank(propertyOwner);
+        assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18);
+        assertEq(assetNFT.ownerOf(1), propertyOwner);
+        assertEq(assetToken.balanceOf(propertyOwner), 100*1e18);
+        assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
+        vm.stopPrank();
+
+        vm.startPrank(investor, investor);
+        assertTrue(usdt.approve(address(assetTokenizer), 100*1e18));
+        assetTokenizer.investInProperty(1, 100*1e18);
+        assertEq(assetToken.balanceOf(propertyOwner), 0);
+        assertEq(assetToken.balanceOf(investor), 100*1e18);
+        skip(3600 * 24);
+        assetTokenizer.claimDividend(1);
+        vm.stopPrank();
+    }
 }
