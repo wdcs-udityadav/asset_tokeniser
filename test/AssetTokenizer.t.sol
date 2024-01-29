@@ -8,15 +8,6 @@ import {AssetToken} from "../src/AssetToken.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract AssetTokenizerTest is Test {
-    struct Property {
-        address propertyOwner;
-        uint256 propertyId;
-        uint256 valuation;
-        uint256 investiblePercentage;
-        uint256 rentalIncome;
-        uint256 investibleAmount;
-    }
-
     AssetTokenizer public assetTokenizer;
     AssetNFT public assetNFT;
     AssetToken public assetToken;
@@ -29,13 +20,10 @@ contract AssetTokenizerTest is Test {
     error TryAfter24Hours();
     error DividentNoLongerCanBeClaimed();
 
-
     event PropertyListed(
         uint256 indexed propertyId, address indexed owner, uint256 valuation, uint256 indexed investibleAmount
     );
-
     event Invested(uint256 indexed propertyId, uint256 indexed amountInvested, address indexed investor);
-
     event DividendClaimed(uint256 indexed propertyId, uint256 indexed amount, address indexed investor);
 
     function setUp() public {
@@ -109,7 +97,7 @@ contract AssetTokenizerTest is Test {
         vm.stopPrank();
     }
 
-     function testInvestFailIfAlreadyInvested() public {
+    function testInvestmentFailIfAlreadyInvested() public {
         address propertyOwner = vm.addr(1);
         address investor = vm.addr(2);
 
@@ -127,7 +115,7 @@ contract AssetTokenizerTest is Test {
         assertTrue(usdt.approve(address(assetTokenizer), 100 * 1e18));
         assetTokenizer.investInProperty(1, 100 * 1e18);
         vm.expectRevert(AlreadyInvested.selector);
-        
+
         assetTokenizer.investInProperty(1, 200 * 1e18);
         vm.stopPrank();
     }
@@ -137,18 +125,18 @@ contract AssetTokenizerTest is Test {
         address investor = vm.addr(2);
 
         vm.deal(propertyOwner, 100000 ether);
-        deal(address(usdt), investor, 100*1e18, true);
+        deal(address(usdt), investor, 100 * 1e18, true);
 
         vm.startPrank(propertyOwner);
-        assetTokenizer.listProperty{value: 100000*1e18}(1, 1000*1e18, 10, 100000*1e18);
-        assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
+        assetTokenizer.listProperty{value: 100000 * 1e18}(1, 1000 * 1e18, 10, 100000 * 1e18);
+        assertTrue(assetToken.approve(address(assetTokenizer), 100 * 1e18));
         vm.stopPrank();
 
         vm.startPrank(investor);
-        usdt.approve(address(assetTokenizer), 100*1e18);
+        usdt.approve(address(assetTokenizer), 100 * 1e18);
         vm.expectEmit(true, true, true, false);
-        emit Invested(1, 100*1e18, address(investor));
-        assetTokenizer.investInProperty(1, 100*1e18);
+        emit Invested(1, 100 * 1e18, address(investor));
+        assetTokenizer.investInProperty(1, 100 * 1e18);
         vm.stopPrank();
     }
 

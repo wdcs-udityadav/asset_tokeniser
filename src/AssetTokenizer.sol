@@ -8,8 +8,8 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
 
-    //dai, since theres's come issue with approvals on USDT contract
-    address constant USDT = 0x6B175474E89094C44Da98b954EedeAC495271d0F; 
+    //using dai, since theres's some issue with approvals on USDT contract
+    address constant USDT = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     uint256 constant duration = 365 * 1 days;
     AssetToken public _assetToken;
@@ -44,10 +44,8 @@ contract AssetTokenizer {
     event PropertyListed(
         uint256 indexed propertyId, address indexed owner, uint256 valuation, uint256 indexed investibleAmount
     );
-
     event Invested(uint256 indexed propertyId, uint256 indexed amountInvested, address indexed investor);
-
-    event DividendClaimed(uint256 indexed propertyId, uint256 indexed  amount, address indexed investor);
+    event DividendClaimed(uint256 indexed propertyId, uint256 indexed amount, address indexed investor);
 
     constructor() {
         _assetToken = new AssetToken(address(this));
@@ -62,7 +60,6 @@ contract AssetTokenizer {
             _propertyId > 0 && _valuation > 0 && _investiblePercentage > 0 && _rentalIncome > 0,
             "Input must be greater than zero."
         );
-
         require(msg.value == _rentalIncome, "msg.value must be equal to rentalincome");
 
         uint256 investibleAmount = (_investiblePercentage * _valuation) / 100;
@@ -102,9 +99,7 @@ contract AssetTokenizer {
 
     function claimDividend(uint256 _propertyId) public {
         if (investments[_propertyId][msg.sender].amountInvested == 0) revert NoInvestmentFound();
-        if (block.timestamp > investments[_propertyId][msg.sender].investedAt + duration) {
-            revert DividentNoLongerCanBeClaimed();
-        }
+        if (block.timestamp > investments[_propertyId][msg.sender].investedAt + duration) revert DividentNoLongerCanBeClaimed();
 
         uint256 elapsedTime = block.timestamp - investments[_propertyId][msg.sender].investedAt;
         if (elapsedTime < 1 days) revert TryAfter24Hours();

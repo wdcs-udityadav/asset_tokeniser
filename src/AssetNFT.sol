@@ -5,7 +5,6 @@ pragma solidity ^0.8.15;
 import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/utils/Counters.sol";
-// import "forge-std/console.sol";//;
 
 contract AssetNFT is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
