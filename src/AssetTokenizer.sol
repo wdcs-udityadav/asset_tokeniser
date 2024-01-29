@@ -55,7 +55,9 @@ contract AssetTokenizer {
     }
 
     function listProperty(uint256 _propertyId, uint256 _valuation, uint256 _investiblePercentage, uint256 _rentalIncome)
-        public payable returns(uint256)
+        public
+        payable
+        returns (uint256)
     {
         require(
             _propertyId > 0 && _valuation > 0 && _investiblePercentage > 0 && _rentalIncome > 0,
@@ -102,9 +104,11 @@ contract AssetTokenizer {
 
     function claimDividend(uint256 _propertyId) public {
         if (investments[_propertyId][msg.sender].amountInvested == 0) revert NoInvestmentFound();
-        if (block.timestamp > investments[_propertyId][msg.sender].investedAt+duration) revert DividentNoLongerCanBeClaimed();
+        if (block.timestamp > investments[_propertyId][msg.sender].investedAt + duration) {
+            revert DividentNoLongerCanBeClaimed();
+        }
 
-        uint256 elapsedTime =  block.timestamp - investments[_propertyId][msg.sender].investedAt;
+        uint256 elapsedTime = block.timestamp - investments[_propertyId][msg.sender].investedAt;
         if (elapsedTime < 1 days) revert TryAfter24Hours();
 
         uint256 dividendAmount = (
