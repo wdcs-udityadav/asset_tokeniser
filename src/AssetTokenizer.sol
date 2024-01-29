@@ -3,9 +3,9 @@ pragma solidity ^0.8.13;
 
 import {AssetToken} from "./AssetToken.sol";
 import {AssetNFT} from "./AssetNFT.sol";
+import "forge-std/console.sol";
 
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-// import "forge-std/console.sol";
 
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
@@ -119,5 +119,6 @@ contract AssetTokenizer {
         payable(msg.sender).transfer(dividendPerDay);
 
         emit DividendClaimed(_propertyId, dividendPerDay, msg.sender);
+        console.log(_propertyId, dividendPerDay, msg.sender);
     }
 }
