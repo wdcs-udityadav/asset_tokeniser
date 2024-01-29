@@ -40,31 +40,28 @@ contract AssetTokenizerTest is Test {
     }
 
     function testPropertyListed() public {
-        assetTokenizer.listProperty(1, 1000, 10, 100000);
+        assetTokenizer.listProperty{value: 100000*1e18}(1, 1000*1e18, 10, 100000*1e18);
 
         assertEq(assetNFT.ownerOf(1), address(this));
-        assertEq(assetToken.balanceOf(address(this)), 100);
+        assertEq(assetToken.balanceOf(address(this)), 100*1e18);
     }
 
     function testEmitPropertyListed() public {
         vm.expectEmit(true, true, false, true);
-        emit PropertyListed(1, address(this), 1000, 100);
-        assetTokenizer.listProperty(1, 1000, 10, 100000);
+        emit PropertyListed(1, address(this), 1000*1e18, 100*1e18);
+        assetTokenizer.listProperty{value: 100000*1e18}(1, 1000*1e18, 10, 100000*1e18);
     }
 
     function testInvestInProperty() public {
         address propertyOwner = vm.addr(1);
         address investor = vm.addr(2);
-        // console.log("investor: ", investor);
-        // console.log("propertyOwner: ", propertyOwner);
-        // console.log("address(this): ", address(this));
-
         // console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
+        vm.deal(propertyOwner, 100000 ether);
         deal(address(usdt), investor, 100 * 1e18, true);
         // console.log("Balance of investor: ", usdt.balanceOf(investor)/1e18);
 
         vm.startPrank(propertyOwner);
-        assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18);
+        assetTokenizer.listProperty{value: 100000*1e18}(1, 1000*1e18, 10, 100000*1e18);
         assertEq(assetNFT.ownerOf(1), propertyOwner);
         // console.log("owner",assetNFT.ownerOf(1));
         // console.log("Balance of proper: ", usdt.balanceOf(investor)/1e18);
@@ -96,7 +93,7 @@ contract AssetTokenizerTest is Test {
     //     deal(address(usdt), investor, 100*1e18, true);
 
     //     vm.startPrank(propertyOwner);
-    //     assertEq(assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18),1);
+    //     assertEq(assetTokenizer.listProperty{value: 100000*1e18}(1, 1000*1e18, 10, 100000*1e18),1);
     //     assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
     //     vm.stopPrank();
 
@@ -114,10 +111,18 @@ contract AssetTokenizerTest is Test {
         address propertyOwner = vm.addr(1);
         address investor = vm.addr(2);
 
+        console.log("balance contract: ", address(assetTokenizer).balance);
+        console.log("balance prop owner: ", address(propertyOwner).balance);
+
+        vm.deal(propertyOwner, 100000 ether);
         deal(address(usdt), investor, 100 * 1e18, true);
+        console.log("balance prop owner: ", address(propertyOwner).balance);
+
 
         vm.startPrank(propertyOwner);
-        assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18);
+        assetTokenizer.listProperty{value: 100000*1e18}(1, 1000*1e18, 10, 100000*1e18);
+        console.log("balance prop owner: ", address(propertyOwner).balance);
+        console.log("balance contract: ", address(assetTokenizer).balance);
         assertEq(assetNFT.ownerOf(1), propertyOwner);
         assertEq(assetToken.balanceOf(propertyOwner), 100*1e18);
         assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));
@@ -138,10 +143,11 @@ contract AssetTokenizerTest is Test {
         address propertyOwner = vm.addr(1);
         address investor = vm.addr(2);
 
+        vm.deal(propertyOwner, 100000 ether);
         deal(address(usdt), investor, 100 * 1e18, true);
 
         vm.startPrank(propertyOwner);
-        assetTokenizer.listProperty(1, 1000*1e18, 10, 100000*1e18);
+        assetTokenizer.listProperty{value: 100000*1e18}(1, 1000*1e18, 10, 100000*1e18);
         assertEq(assetNFT.ownerOf(1), propertyOwner);
         assertEq(assetToken.balanceOf(propertyOwner), 100*1e18);
         assertTrue(assetToken.approve(address(assetTokenizer), 100*1e18));

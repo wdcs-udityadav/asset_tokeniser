@@ -5,7 +5,7 @@ import {AssetToken} from "./AssetToken.sol";
 import {AssetNFT} from "./AssetNFT.sol";
 
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "forge-std/console.sol";
+// import "forge-std/console.sol";
 
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
@@ -55,14 +55,15 @@ contract AssetTokenizer {
     }
 
     function listProperty(uint256 _propertyId, uint256 _valuation, uint256 _investiblePercentage, uint256 _rentalIncome)
-        public returns(uint256)
+        public payable returns(uint256)
     {
         require(
             _propertyId > 0 && _valuation > 0 && _investiblePercentage > 0 && _rentalIncome > 0,
             "Input must be greater than zero."
         );
 
-        // console.log("msg.sender in contract:", msg.sender);
+        require(msg.value == _rentalIncome, "msg.value must be equal to rentalincome");
+
         uint256 investibleAmount = (_investiblePercentage * _valuation) / 100;
 
         Property memory _property =
@@ -97,7 +98,6 @@ contract AssetTokenizer {
         IERC20(_assetToken).safeTransferFrom(propertyOwner, msg.sender, _amount);
 
         emit Invested(_propertyId, _amount, msg.sender);
-        console.log("invested: ", _propertyId, _amount, msg.sender);
     }
 
     function claimDividend(uint256 _propertyId) public {
