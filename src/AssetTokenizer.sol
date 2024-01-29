@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {AssetToken} from "./AssetToken.sol";
 import {AssetNFT} from "./AssetNFT.sol";
-import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";  
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract AssetTokenizer {
     using SafeERC20 for IERC20;
@@ -101,7 +101,9 @@ contract AssetTokenizer {
     function claimDividend(uint256 _propertyId) public {
         require(_propertyId != 0, "invalid propertyId");
         if (investments[_propertyId][msg.sender].amountInvested == 0) revert NoInvestmentFound();
-        if (block.timestamp > investments[_propertyId][msg.sender].investedAt + duration) revert DividentNoLongerCanBeClaimed();
+        if (block.timestamp > investments[_propertyId][msg.sender].investedAt + duration) {
+            revert DividentNoLongerCanBeClaimed();
+        }
 
         uint256 elapsedTime = block.timestamp - investments[_propertyId][msg.sender].investedAt;
         if (elapsedTime < 1 days) revert TryAfter24Hours();
